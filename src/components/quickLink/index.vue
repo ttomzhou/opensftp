@@ -8,8 +8,7 @@
                 </template>
             </q-input>
             <q-input label="用户" v-model="username"/>
-            <q-input label="密码" 
-                     v-model="password" 
+            <q-input label="密码" v-model="password" 
                      :type="showPwd ? 'text' : 'password'" 
                      @keydown.enter="sshLogin">
                 <template v-slot:append>
@@ -43,10 +42,10 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: '192.168.0.241',
+                host: '192.168.0.100',
                 port: '22',
-                username: 'root',
-                password: 'srunsoft@xian',
+                username: 'xingrong',
+                password: 'codeMaster.95',
             };
         },
         methods: {
@@ -66,8 +65,8 @@
                 })
                 .then(() => {
                     this.loading = false
-                    console.log('success');
-                    this.$store.commit('sshInfo/SSH_LOGIN', {
+                    this.$store.commit('sshInfo/SSH_ADD', {
+                        ssh: this.ssh,
                         host,
                         port,
                         username,
@@ -76,7 +75,8 @@
                 })
                 .catch(err => {
                     this.loading = false
-                    console.log(err)
+                    // this.notify.error(err)
+                    console.log(err);
                 })
             },
         },

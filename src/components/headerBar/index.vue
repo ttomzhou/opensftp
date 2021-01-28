@@ -1,5 +1,5 @@
 <template>
-    <q-bar>
+    <q-bar class="q-electron-drag">
         <div class="text-weight-bold">Open SFTP</div>
         <session-tag/>
 

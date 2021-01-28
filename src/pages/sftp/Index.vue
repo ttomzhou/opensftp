@@ -1,28 +1,37 @@
 <template>
     <page>
-        <q-splitter v-model="splitterModel" class="full-height" >
+        <q-splitter v-model="splitterModel" class="full-height">
 
             <template v-slot:before>
-                <div class="q-pa-md">
-                    <q-input v-model="pwd" dense outlined
-                                @keydown.enter="la"
-                                @blur="pwd = lastPwd">
-                        <template v-slot:append>
-                            <q-btn round flat
-                                    size="sm"
-                                    icon="chevron_right" 
-                                    color="primary"
-                                    @click="la"/>
-                        </template>
-                    </q-input>
-                </div>
             </template>
 
             <template v-slot:after>
                 <q-scroll-area class="full-height">
+                    <div class="fs-control flex">
+                        <input class="pwd-input" type="text" v-model="pwd" 
+                               @keydown.enter="la"
+                               @blur="pwd = lastPwd">
+                        <q-space/>
+                        <button type="button" class="btn-enter" @click="la">
+                            <q-icon name="chevron_right"/>
+                        </button>
+                        <button type="button" class="btn-enter">
+                            <q-icon name="refresh"/>
+                        </button>
+                        <!-- <q-input v-model="pwd" dense outlined
+                                @keydown.enter="la"
+                                @blur="pwd = lastPwd">
+                            <template v-slot:append>
+                                <q-btn round flat
+                                        size="sm"
+                                        icon="chevron_right" 
+                                        color="primary"
+                                        @click="la"/>
+                            </template>
+                        </q-input> -->
+                    </div>
                     <div class="fs-head">
-                        <div class="item select-all">
-                        </div>
+                        <div class="item select-all"></div>
                         <div class="item name">文件名称</div>
                         <div class="item size">文件大小</div>
                         <div class="item date">修改日期</div>
@@ -117,9 +126,11 @@ export default {
     components: {
     },
     watch: {
-        '$route': function (newVal) {
-            console.log(newVal);
-        }
+        $route(to) {
+            // console.log(to);
+            // this.ssh = this.$store.state.sshInfo.sshActive[0].ssh
+            // this.la()
+        },
     },
     data() {
         return {
@@ -137,6 +148,16 @@ export default {
             clickNum: 0,
             loadingIndex: null,
         }
+    },
+    watch: {
+    },
+    computed: {
+        hideItem() {
+            return item => item.name === '.' || (item.name.startsWith('.') && !this.showHideItem && item.name !== '..')
+        },
+        fileSize() {
+            return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size)
+        },
     },
     methods: {
         la() {
@@ -237,6 +258,7 @@ export default {
         },
     },
     created() {
+        console.log(this.$store.state.sshInfo.sshActive);
         this.ssh = this.$store.state.sshInfo.sshActive[0].ssh
         this.la()
     }
@@ -265,11 +287,33 @@ export default {
     .group
         width: 100px
 
-.fs-head
+.fs-control
     position: sticky
     top: 0
     z-index: 99
-    background: white
+    background: #FFFFFF
+    box-sizing: border-box
+    .pwd-input,
+    .btn-enter
+        height: 25px
+        padding: 0
+        border: 0
+        outline: none
+        background: none
+    .pwd-input
+        padding: 0 5px
+    .btn-enter
+        width: 30px
+        text-align: center
+        cursor: pointer
+        &:hover
+            background: rgba($dark, .1)
+.fs-head
+    position: sticky
+    top: 25px
+    z-index: 99
+    background: #FFFFFF
+    border-top: 1px solid rgba($dark, .1)
     border-bottom: 1px solid rgba($dark, .1)
     .select-all
         width: 25px

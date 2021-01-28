@@ -8,7 +8,7 @@
             <q-icon name="dns"/>
             <div class="label">{{ item.host }}</div>
             <q-space/>
-            <q-btn flat round size="xs" icon="close"/>
+            <q-btn flat round size="xs" icon="close" @click="closeSSH(item)"/>
         </q-bar>
     </div>
 </template>
@@ -31,6 +31,9 @@
                 const { length } = this.$store.state.sshInfo.sshActive
                 this.activeIndex = length ? length - 1 : null
                 this.$router.push(length ? '/sftp' : '/home')
+            },
+            closeSSH(item) {
+                this.$store.commit('sshInfo/SSH_CLOSE', item)
             }
         },
         created() {
