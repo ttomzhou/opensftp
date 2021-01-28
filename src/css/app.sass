@@ -1,1 +1,9 @@
 // app global css in Sass form
+@mixin disable-copy
+    -webkit-touch-callout: none
+    -webkit-user-select: none
+    -moz-user-select: none
+    -ms-user-select: none
+
+.disable-copy
+    @include disable-copy

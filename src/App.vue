@@ -1,5 +1,5 @@
 <template>
-    <div id='q-app'>
+    <div id='q-app' class="disable-copy">
         <router-view />
     </div>
 </template>

@@ -1,14 +1,14 @@
 import { LocalStorage, Dark } from 'quasar'
 
-const setting = {
+const state = {
     autoUpdate : true,
     dark       : false,
 }
 
-Object.keys(setting).forEach(key => setting[key] = LocalStorage.getItem(key) === null ? setting[key] : LocalStorage.getItem(key))
+Object.keys(state).forEach(key => state[key] = LocalStorage.getItem(key) === null ? state[key] : LocalStorage.getItem(key))
 
-Dark.set(setting.dark)
+Dark.set(state.dark)
 
 export default function () {
-    return setting
+    return state
 }

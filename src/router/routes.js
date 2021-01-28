@@ -1,9 +1,13 @@
 const routes = [{
     path: '/',
+    redirect: '/home',
     component: () => import('layouts/main'),
     children: [{
         path: '/home',
         component: () => import('pages/home')
+    }, {
+        path: '/sftp',
+        component: () => import('pages/sftp')
     }]
 },
 

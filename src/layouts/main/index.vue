@@ -1,13 +1,7 @@
 <template>
     <q-layout view="lHh Lpr lFf">
         <q-header elevated>
-            <q-toolbar>
-                <q-btn flat dense round
-                       icon="menu"
-                       aria-label="Menu"/>
-                <q-toolbar-title>Quasar App</q-toolbar-title>
-                <div>Quasar v{{ info.version }}</div>
-            </q-toolbar>
+            <header-bar/>
         </q-header>
 
         <q-page-container>
@@ -17,14 +11,16 @@
 </template>
 
 <script>
-import info from '../../../package.json'
+import headerBar from 'src/components/headerBar'
 
 export default {
     name: "MainLayout",
+    components: {
+        'header-bar': headerBar
+    },
     data() {
         return {
-            info,
         };
-    },
+    }
 };
 </script>
