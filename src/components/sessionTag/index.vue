@@ -1,6 +1,6 @@
 <template>
     <div class="row full-height">
-        <q-bar v-for="(item, index) in $store.state.sshInfo.sshActive"
+        <q-bar v-for="(item, index) in $store.state.sshInfo.sshTags"
                :key="index"
                class="tag cursor-pointer"
                :class="{ active: activeIndex === index }"
@@ -22,13 +22,13 @@
             };
         },
         watch: {
-            '$store.state.sshInfo.sshActive': function() {
+            '$store.state.sshInfo.sshTags': function() {
                 this.check()
             },
         },
         methods: {
             check() {
-                const { length } = this.$store.state.sshInfo.sshActive
+                const { length } = this.$store.state.sshInfo.sshTags
                 this.activeIndex = length ? length - 1 : null
                 this.$router.push(length ? '/sftp' : '/home')
             },

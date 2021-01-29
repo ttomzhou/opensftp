@@ -128,7 +128,7 @@ export default {
     watch: {
         $route(to) {
             // console.log(to);
-            // this.ssh = this.$store.state.sshInfo.sshActive[0].ssh
+            // this.ssh = this.$store.state.sshInfo.sshTags[0].ssh
             // this.la()
         },
     },
@@ -258,8 +258,8 @@ export default {
         },
     },
     created() {
-        console.log(this.$store.state.sshInfo.sshActive);
-        this.ssh = this.$store.state.sshInfo.sshActive[0].ssh
+        console.log(this.$store.state.sshInfo.sshTags);
+        this.ssh = this.$store.state.sshInfo.sshTags[0].ssh
         this.la()
     }
 };

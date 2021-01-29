@@ -1,4 +1,4 @@
-import { LocalStorage } from 'quasar'
+import { LocalStorage,uid } from 'quasar'
 
 export function SSH_ADD(state, obj) {
     const { ssh, host, port, username, password } = obj
@@ -8,18 +8,19 @@ export function SSH_ADD(state, obj) {
         && item.password === password)
 
     if (!same.length) state.sshList.push({
+        id: uid(),
         name: '',
         addTime: Date.now(),
         host, port, username, password,
     })
 
-    state.sshActive.push({ 
+    state.sshTags.push({ 
         name: '',
         host, port, ssh,
     })
 
-    LocalStorage.set('sshActive', state.sshActive)
     LocalStorage.set('sshList', state.sshList)
+    // LocalStorage.set('sshTags', state.sshTags)
 }
 
 export function SSH_CLOSE(state, obj) {
@@ -31,10 +32,10 @@ export function SSH_CLOSE(state, obj) {
         }
     })
 
-    state.sshActive.filter((item, index) => {
+    state.sshTags.filter((item, index) => {
         if(item.host === host && item.port === port) {
-            state.sshActive.splice(index, 1)
-            LocalStorage.set('sshActive', state.sshActive)
+            state.sshTags.splice(index, 1)
+            // LocalStorage.set('sshTags', state.sshTags)
         }
     })
 }
