@@ -29,20 +29,6 @@ const router = new VueRouter({
 
 // 注册全局钩子用来拦截路由
 router.beforeEach((to, from, next) => {
-    console.log(to);
-    console.log(from);
-    // // 取消其他路由的请求
-    // store.commit('user/CLEAR_REQUEST');
-    // // 获取用户 Token 与 Root
-    // const { token, root } = store.state.user;
-    // if (to.meta.guest) return next();
-    // // 若没有 token，所有页面重定向至登录页
-    // if (to.path !== '/' && !token) return next({ path: '/' });
-    // // 若存在 token，登陆页重定向至首页
-    // if (to.path === '/' && token) return next({ path: config.project.index });
-    // // 若无权限访问页面，重定向至 404
-    // if (to.meta.root && !root) return next({ path: '404' });
-    // 路由正常跳转
     return next();
 });
 

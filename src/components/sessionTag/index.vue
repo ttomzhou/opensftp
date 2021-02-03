@@ -1,14 +1,14 @@
 <template>
     <div class="row full-height">
-        <q-bar v-for="(item, index) in $store.state.sshInfo.sshTags"
+        <q-bar v-for="(sshKey, index) in $store.state.sshInfo.sshTags"
                :key="index"
                class="tag cursor-pointer"
-               :class="{ active: activeIndex === index }"
-               @click="activeIndex = index">
+               :class="{ active: $store.state.sshInfo.sshActive === index }"
+               @click="$store.commit('sshInfo/CHANGE_ACTIVE', index)">
             <q-icon name="dns"/>
-            <div class="label">{{ item.host }}</div>
+            <div class="label">{{ activeSSH().host }}</div>
             <q-space/>
-            <q-btn flat round size="xs" icon="close" @click="closeSSH(item)"/>
+            <q-btn flat round size="xs" icon="close" @click="closeSSH(index)"/>
         </q-bar>
     </div>
 </template>
@@ -18,26 +18,21 @@
         name: 'SessionTag',
         data() {
             return {
-                activeIndex: null,
             };
         },
-        watch: {
-            '$store.state.sshInfo.sshTags': function() {
-                this.check()
+        computed: {
+            activeSSH() {
+                return () => this.$store.state.sshInfo.sshList.get(this.$store.state.sshInfo.sshTags[this.$store.state.sshInfo.sshActive])
             },
         },
+        watch: {
+        },
         methods: {
-            check() {
-                const { length } = this.$store.state.sshInfo.sshTags
-                this.activeIndex = length ? length - 1 : null
-                this.$router.push(length ? '/sftp' : '/home')
-            },
-            closeSSH(item) {
-                this.$store.commit('sshInfo/SSH_CLOSE', item)
+            closeSSH(index) {
+                this.$store.commit('sshInfo/SSH_TAGS_DEL', index)
             }
         },
         created() {
-            this.check()
         },
     };
 </script>

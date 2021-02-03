@@ -42,10 +42,10 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: '192.168.0.241',
+                host: '192.168.0.100',
                 port: '22',
-                username: 'root',
-                password: 'srunsoft@xian',
+                username: 'xingrong',
+                password: 'codeMaster.95',
             };
         },
         methods: {
@@ -65,17 +65,12 @@
                 })
                 .then(() => {
                     this.loading = false
-                    this.$store.commit('sshInfo/SSH_ADD', {
-                        ssh: this.ssh,
-                        host,
-                        port,
-                        username,
-                        password,
+                    this.$store.commit('sshInfo/SSH_ADD', { host, port, username, password,
+                        callback: sshKey => this.$store.commit('sshInfo/SSH_TAGS_ADD', sshKey)
                     })
                 })
                 .catch(err => {
                     this.loading = false
-                    // this.notify.error(err)
                     console.log(err);
                 })
             },
