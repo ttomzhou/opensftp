@@ -1,0 +1,83 @@
+<template>
+    <q-menu touch-position
+            context-menu 
+            @before-show="$emit('click', listIndex)">
+        <q-list dense style="min-width: 100px">
+            <q-item clickable v-close-popup>
+                <q-item-section>以 Webstorm 编辑</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+                <q-item-section>下载</q-item-section>
+            </q-item>
+            <q-item clickable>
+                <q-item-section>选择打开方式</q-item-section>
+                <q-item-section side>
+                    <q-icon name="keyboard_arrow_right"/>
+                </q-item-section>
+                <q-menu anchor="top end" self="top start">
+                    <q-list style="width: 120px">
+                        <q-item dense clickable v-for="item in editorList" :key="item.name">
+                            <q-item-section>{{ item.name }}</q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-menu>
+            </q-item>
+            <q-separator />
+            <q-item clickable v-close-popup>
+                <q-item-section>复制</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+                <q-item-section>粘贴</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+                <q-item-section>删除</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+                <q-item-section>重命名</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+                <q-item-section>修改权限</q-item-section>
+            </q-item>
+            <q-separator/>
+            <q-item clickable v-close-popup>
+                <q-item-section>属性</q-item-section>
+            </q-item>
+        </q-list>
+    </q-menu>
+</template>
+
+<script>
+    export default {
+        name: 'SFTPMenuList',
+        props: {
+            listItem: {
+                type: Object,
+                default: {},
+            },
+            listIndex: {
+                type: Number,
+                default: 0,
+            }
+        },
+        data() {
+            return {
+                editorList: [
+                    { name: 'VSCode' },
+                    { name: 'Sublime' },
+                    { name: 'Atom' },
+                    { name: 'Websotrm' },
+                    { name: 'PHPStorm' },
+                    { name: 'GoLand' },
+                ],
+            }
+        },
+        watch: {
+        },
+        computed: {
+        },
+        methods: {
+        },
+        created() {
+        }
+    }
+</script>

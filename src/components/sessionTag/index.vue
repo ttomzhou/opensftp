@@ -16,24 +16,16 @@
 <script>
     export default {
         name: 'SessionTag',
-        data() {
-            return {
-            };
-        },
         computed: {
             activeSSH() {
                 const { sshList, sshTags, sshActive } = this.$store.state.sshInfo
                 return () => sshList.get(sshTags[sshActive].sshKey)
             },
         },
-        watch: {
-        },
         methods: {
             closeSSH(index) {
                 this.$store.commit('sshInfo/SSH_TAGS_DEL', index)
             }
-        },
-        created() {
         },
     };
 </script>

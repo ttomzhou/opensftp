@@ -42,10 +42,10 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: '192.168.0.241',
+                host: '192.168.0.100',
                 port: '22',
-                username: 'root',
-                password: 'srunsoft@xian',
+                username: 'xingrong',
+                password: 'codeMaster.95',
             };
         },
         methods: {
