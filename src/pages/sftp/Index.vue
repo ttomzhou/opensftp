@@ -6,6 +6,9 @@
             </template>
 
             <template v-slot:after>
+                <q-inner-loading :showing="loading" style="z-index: 100">
+                    <q-spinner-gears size="50px" color="primary" />
+                </q-inner-loading>
                 <q-scroll-area class="full-height">
                     <div class="fs-control flex">
                         <input class="pwd-input" type="text" v-model="pwd" 
@@ -121,148 +124,172 @@
 </template>
 
 <script>
-export default {
-    name: 'SFTP',
-    components: {
-    },
-    watch: {
-        $route(to) {
-            // console.log(to);
-            // this.ssh = this.$store.state.sshInfo.sshTags[0].ssh
-            // this.la()
+    const { NodeSSH } = require('node-ssh')
+
+    export default {
+        name: 'SFTP',
+        components: {
         },
-    },
-    data() {
-        return {
-            ssh: '',
-            splitterModel: 50,
-            show: true,
-            maximizedToggle: true,
-            showHideItem: false,
-            selectAll: false,
-            pwd: '/',
-            lastPwd: '',
-            laList: [],
-            loading: false,
-            selectedIndex: 0,
-            clickNum: 0,
-            loadingIndex: null,
-        }
-    },
-    watch: {
-    },
-    computed: {
-        hideItem() {
-            return item => item.name === '.' || (item.name.startsWith('.') && !this.showHideItem && item.name !== '..')
+        watch: {
         },
-        fileSize() {
-            return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size)
-        },
-    },
-    methods: {
-        la() {
-            if (this.pwd === this.lastPwd) return
-            const cmd = 'ls -la --time-style="+%Y-%m-%d %H:%I:%S"'
-            this.loading = true
-            this.ssh.execCommand(cmd, { cwd: this.pwd })
-                .then(res => {
-                    if (res.stderr) {
-                        this.loading = false
-                        this.pwd = this.lastPwd
-                        return this.tools.confirm(res.stderr)
-                    }
-                    const list = res.stdout.split('\n')
-                    list.splice(0, 1)
-                    list.forEach((item, index) => {
-                        const itemArr = item.split(' ').filter(tempItem => tempItem)
-                        const itemObj = {
-                            type    : itemArr[0].substring(0, 1),
-                            attr    : '',
-                            childNum: itemArr[1],
-                            owner   : itemArr[2],
-                            group   : itemArr[3],
-                            size    : itemArr[4], // 字节
-                            date    : `${itemArr[5]} ${itemArr[6]}`,
-                            name    : itemArr[7],
-                            link    : itemArr[9] || ''
-                        }
-                        itemObj.icon = this.getFileIcon(itemObj.type, itemObj.name)
-                        list[index] = itemObj
-                    })                        
-                    this.laList = list
-                    this.lastPwd = this.pwd
-                    this.selectedIndex = 0
-                    this.loading = false
-                })
-        },
-        getFileIcon(type, name) {
-            const suffix = type === '-' ? name.split('.').pop() : ''
-            // 目录
-            if (type === 'd') return require('src/assets/sftp-icons/folder-other.svg')
-            // 链接
-            if (type === 'l') return require('src/assets/sftp-icons/folder-shared.svg')
-            // 管理文件
-            if (type === 'p') return 'p'
-            // 设备文件
-            if (type === 'b') return 'b'
-            // 字符设备文件
-            if (type === 'c') return 'c'
-            // 套接字文件
-            if (type === 's') return 's'
-            // 普通文件
-            if (suffix === 'js') return require('src/assets/sftp-icons/javascript.svg')
-            // 普通文件
-            if (type === '-') return require('src/assets/sftp-icons/document.svg')
-        },
-        select(item, index) {
-            this.selectedIndex = index
-            this.clickNum += 1
-            if (this.clickNum >= 2) {
-                this.clickNum = 0
-                return this.doubleClick(item, index)
+        data() {
+            return {
+                ssh: '',
+                splitterModel: 50,
+                show: true,
+                maximizedToggle: true,
+                showHideItem: false,
+                selectAll: false,
+                pwd: '/',
+                lastPwd: '',
+                laList: [],
+                loading: false,
+                selectedIndex: 0,
+                clickNum: 0,
+                loadingIndex: null,
             }
-            setTimeout(() => this.clickNum = 0, 200)
         },
-        doubleClick(item, index) {
-            const { name } = item
-            this.loadingIndex = index
-            this.pwd = (() => {
-                const arr = this.pwd.split('/').filter(arrItem => arrItem)
-                name === '..' ? arr.pop() : arr.push(name)
-                return '/' + arr.join('/')
-            })()
-            this.la()
+        watch: {
+            '$store.state.sshInfo.sshTags': function () {
+                this.sshLogin()
+            }
         },
-        moveSelected(action) {
-            if (action === 'up') this.selectedIndex = this.selectedIndex === 0
-                ? 0
-                : this.selectedIndex - 1
-            if (action === 'down') this.selectedIndex = this.selectedIndex === this.laList.length - 1
-                ? this.laList.length - 1
-                : this.selectedIndex + 1
-            // This item is .
-            if (this.laList[this.selectedIndex].name === '.') return this.selectedIndex = 1
-            // This item is hidden
-            if (this.hideItem(this.laList[this.selectedIndex])) return this.moveSelected(action)
+        computed: {
+            hideItem() {
+                return item => item.name === '.' || (item.name.startsWith('.') && !this.showHideItem && item.name !== '..')
+            },
+            fileSize() {
+                return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size)
+            },
         },
-        dirEnter() {
-            this.doubleClick(this.laList[this.selectedIndex], this.selectedIndex)
+        methods: {
+            la() {
+                if (this.pwd === this.lastPwd) return
+                const cmd = 'ls -la --time-style="+%Y-%m-%d %H:%I:%S"'
+                this.loading = true
+                this.ssh.execCommand(cmd, { cwd: this.pwd })
+                    .then(res => {
+                        if (res.stderr) {
+                            this.loading = false
+                            this.pwd = this.lastPwd
+                            return this.tools.confirm(res.stderr)
+                        }
+                        const list = res.stdout.split('\n')
+                        list.splice(0, 1)
+                        list.forEach((item, index) => {
+                            const itemArr = item.split(' ').filter(tempItem => tempItem)
+                            const itemObj = {
+                                type    : itemArr[0].substring(0, 1),
+                                attr    : '',
+                                childNum: itemArr[1],
+                                owner   : itemArr[2],
+                                group   : itemArr[3],
+                                size    : itemArr[4], // 字节
+                                date    : `${itemArr[5]} ${itemArr[6]}`,
+                                name    : itemArr[7],
+                                link    : itemArr[9] || ''
+                            }
+                            itemObj.icon = this.getFileIcon(itemObj.type, itemObj.name)
+                            list[index] = itemObj
+                        })                        
+                        this.laList = list
+                        this.lastPwd = this.pwd
+                        this.selectedIndex = 0
+                        this.loading = false
+                    })
+            },
+            getFileIcon(type, name) {
+                const suffix = type === '-' ? name.split('.').pop() : ''
+                // 目录
+                if (type === 'd') return require('src/assets/sftp-icons/folder-other.svg')
+                // 链接
+                if (type === 'l') return require('src/assets/sftp-icons/folder-shared.svg')
+                // 管理文件
+                if (type === 'p') return 'p'
+                // 设备文件
+                if (type === 'b') return 'b'
+                // 字符设备文件
+                if (type === 'c') return 'c'
+                // 套接字文件
+                if (type === 's') return 's'
+                // 普通文件
+                if (suffix === 'js') return require('src/assets/sftp-icons/javascript.svg')
+                // 普通文件
+                if (type === '-') return require('src/assets/sftp-icons/document.svg')
+            },
+            select(item, index) {
+                this.selectedIndex = index
+                this.clickNum += 1
+                if (this.clickNum >= 2) {
+                    this.clickNum = 0
+                    return this.doubleClick(item, index)
+                }
+                setTimeout(() => this.clickNum = 0, 200)
+            },
+            doubleClick(item, index) {
+                const { name } = item
+                this.loadingIndex = index
+                this.pwd = (() => {
+                    const arr = this.pwd.split('/').filter(arrItem => arrItem)
+                    name === '..' ? arr.pop() : arr.push(name)
+                    return '/' + arr.join('/')
+                })()
+                this.la()
+            },
+            moveSelected(action) {
+                if (action === 'up') this.selectedIndex = this.selectedIndex === 0
+                    ? 0
+                    : this.selectedIndex - 1
+                if (action === 'down') this.selectedIndex = this.selectedIndex === this.laList.length - 1
+                    ? this.laList.length - 1
+                    : this.selectedIndex + 1
+                // This item is .
+                if (this.laList[this.selectedIndex].name === '.') return this.selectedIndex = 1
+                // This item is hidden
+                if (this.hideItem(this.laList[this.selectedIndex])) return this.moveSelected(action)
+            },
+            dirEnter() {
+                this.doubleClick(this.laList[this.selectedIndex], this.selectedIndex)
+            },
+            dirBack() {
+                this.pwd = (() => {
+                    const arr = this.pwd.split('/').filter(arrItem => arrItem)
+                    arr.pop()
+                    return '/' + arr.join('/')
+                })()
+                this.la()
+            },
+            sshLogin() {
+                if (!this.$store.state.sshInfo.sshTags.length) return this.$router.push({ path: '/' })
+                this.loading = true
+                const { sshList, sshTags, sshActive } = this.$store.state.sshInfo
+                const sshInfo = sshList.get(sshTags[sshActive].sshKey)
+                const { host, port, username, password } = sshInfo
+                this.ssh = new NodeSSH()
+                this.ssh.connect({
+                    host,
+                    username,
+                    port,
+                    password,
+                    tryKeyboard: true,
+                    onKeyboardInteractive: (name, instructions, instructionsLang, prompts, finish) => {
+                        if (prompts.length > 0 && prompts[0].prompt.toLowerCase().includes('password')) finish([password])
+                    },
+                })
+                .then(() => {
+                    this.loading = false
+                    this.la()
+                })
+                .catch(err => {
+                    this.loading = false
+                    console.log(err);
+                })
+            },
         },
-        dirBack() {
-            this.pwd = (() => {
-                const arr = this.pwd.split('/').filter(arrItem => arrItem)
-                arr.pop()
-                return '/' + arr.join('/')
-            })()
-            this.la()
-        },
-    },
-    created() {
-        console.log(this.$store.state.sshInfo.sshTags);
-        this.ssh = this.$store.state.sshInfo.sshTags[0].ssh
-        this.la()
+        created() {
+            this.sshLogin()
+        }
     }
-};
 </script>
 
 <style lang="sass" scope>

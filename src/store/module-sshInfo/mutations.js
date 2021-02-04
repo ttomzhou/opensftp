@@ -1,4 +1,5 @@
 import { LocalStorage } from 'quasar'
+import router from 'src/router'
 
 // 会话池新增会话
 export function SSH_ADD(state, obj) {
@@ -29,8 +30,10 @@ export function SSH_DEL(state, sshKey) {
 }
 
 // 标签池新增会话
-export function SSH_TAGS_ADD(state, sshKey) {
-    state.sshTags.push(sshKey)
+export function SSH_TAGS_ADD(state, obj) {
+    state.sshTags.push({
+        sshKey: obj.sshKey,
+    })
     CHANGE_ACTIVE(state, state.sshTags.length - 1)
 }
 

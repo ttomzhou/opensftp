@@ -1,6 +1,6 @@
 <template>
     <div class="row full-height">
-        <q-bar v-for="(sshKey, index) in $store.state.sshInfo.sshTags"
+        <q-bar v-for="(item, index) in $store.state.sshInfo.sshTags"
                :key="index"
                class="tag cursor-pointer"
                :class="{ active: $store.state.sshInfo.sshActive === index }"
@@ -22,7 +22,8 @@
         },
         computed: {
             activeSSH() {
-                return () => this.$store.state.sshInfo.sshList.get(this.$store.state.sshInfo.sshTags[this.$store.state.sshInfo.sshActive])
+                const { sshList, sshTags, sshActive } = this.$store.state.sshInfo
+                return () => sshList.get(sshTags[sshActive].sshKey)
             },
         },
         watch: {

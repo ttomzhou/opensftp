@@ -42,18 +42,18 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: '192.168.0.100',
+                host: '192.168.0.241',
                 port: '22',
-                username: 'xingrong',
-                password: 'codeMaster.95',
+                username: 'root',
+                password: 'srunsoft@xian',
             };
         },
         methods: {
             sshLogin() {
-                const { host, port, username, password } = this
                 this.loading = true
-                this.ssh = new NodeSSH()
-                this.ssh.connect({
+                const { host, port, username, password } = this
+                const ssh = new NodeSSH()
+                ssh.connect({
                     host,
                     username,
                     port,
@@ -66,8 +66,11 @@
                 .then(() => {
                     this.loading = false
                     this.$store.commit('sshInfo/SSH_ADD', { host, port, username, password,
-                        callback: sshKey => this.$store.commit('sshInfo/SSH_TAGS_ADD', sshKey)
+                        callback: sshKey => this.$store.commit('sshInfo/SSH_TAGS_ADD', {
+                            sshKey,
+                        })
                     })
+                    this.$router.push({ path: '/sftp' })
                 })
                 .catch(err => {
                     this.loading = false
