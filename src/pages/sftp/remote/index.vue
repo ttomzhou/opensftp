@@ -25,21 +25,23 @@
         </div>
         <div class="fs-body">
             <div v-for="(item, index) in laList" 
-                    class="fs-item"
-                    :key="index" 
-                    :class="{ 
-                        active: index === selectedIndex,
-                        hidden: hideItem(item)
-                    }"
-                    @click="select(item, index)">
+                 class="fs-item"
+                 :key="index" 
+                 :class="{ 
+                     active: index === selectedIndex,
+                     hidden: hideItem(item)
+                 }"
+                 @click="selectedIndex = index"
+                 @dblclick="dirEnter">
                 <div class="item icon">
-                    <img :src="item.icon" alt="">
+                    <img :src="getFileIcon(item)" alt="">
                 </div>
                 <div class="item name">{{ item.name }}</div>
-                <div class="item size" v-show="item.name !== '..'">{{ fileSize(item) }}</div>
-                <div class="item date" v-show="item.name !== '..'">{{ item.date }}</div>
-                <div class="item owner" v-show="item.name !== '..'">{{ item.owner }}</div>
-                <div class="item group" v-show="item.name !== '..'">{{ item.group }}</div>
+                <div class="item size">{{ fileSize(item) }}</div>
+                <div class="item date">{{ item.date }}</div>
+                <div class="item owner">{{ item.owner }}</div>
+                <div class="item group">{{ item.group }}</div>
+                <!-- 右键菜单 -->
                 <menu-list :listItem="item" :listIndex="index" @click="listIndex => selectedIndex = listIndex"/>
             </div>
         </div>
@@ -82,10 +84,66 @@
         },
         computed: {
             hideItem() {
-                return item => item.name === '.' || (item.name.startsWith('.') && !this.showHideItem && item.name !== '..')
+                // 文件名以 . 开头为隐藏文件
+                return item => item.name.startsWith('.') && item.name !== '..'
             },
             fileSize() {
+                // 只有文件类型才有文件大小概念
                 return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size)
+            },
+            listFormat() {
+                return stdout => {
+                    const list = []
+                    stdout.split('\n').forEach(item => {
+                        const itemArr = item.split(' ').filter(tempItem => tempItem)
+                        // 忽略 total
+                        if (itemArr[0] === 'total') return
+                        // 忽略 .
+                        if (itemArr[7] === '.') return
+                        // push 到 list 数组
+                        list.push({
+                            // 文件类型
+                            type    : itemArr[0].substring(0, 1),
+                            // 文件数量
+                            childNum: itemArr[1],
+                            // 所有者
+                            owner   : itemArr[2],
+                            // 所在群组
+                            group   : itemArr[3],
+                            // 文件大小
+                            size    : itemArr[4],
+                            // 创建日期
+                            date    : `${itemArr[5]} ${itemArr[6]}`,
+                            // 文件名称
+                            name    : itemArr[7],
+                            // 链接地址
+                            link    : itemArr[9] || ''
+                        })
+                    })
+                    return list
+                }
+            },
+            getFileIcon() {
+                return item => {
+                    const { type, name } = item
+                    const suffix = type === '-' ? name.split('.').pop() : ''
+                    // 目录
+                    if (type === 'd') return require('src/assets/sftp-icons/folder-other.svg')
+                    // 链接
+                    if (type === 'l') return require('src/assets/sftp-icons/folder-shared.svg')
+                    // 管理文件
+                    if (type === 'p') return 'p'
+                    // 设备文件
+                    if (type === 'b') return 'b'
+                    // 字符设备文件
+                    if (type === 'c') return 'c'
+                    // 套接字文件
+                    if (type === 's') return 's'
+                    // 普通文件
+                    if (suffix === 'js') return require('src/assets/sftp-icons/javascript.svg')
+                    // 普通文件
+                    if (type === '-') return require('src/assets/sftp-icons/document.svg')
+                }
             },
         },
         methods: {
@@ -95,64 +153,18 @@
                 this.loading = true
                 this.ssh.execCommand('ls -la --time-style="+%Y-%m-%d %H:%I:%S"', { cwd: this.pwd })
                     .then(res => {
+                        this.loading = false
                         if (res.stderr) {
-                            this.loading = false
                             this.pwd = this.lastPwd
                             return this.tools.confirm(res.stderr)
                         }
-                        const list = res.stdout.split('\n').filter(item => !item.startsWith('total'))
-                        list.forEach((item, index) => {
-                            const itemArr = item.split(' ').filter(tempItem => tempItem)
-                            const itemObj = {
-                                type    : itemArr[0].substring(0, 1),
-                                attr    : '',
-                                childNum: itemArr[1],
-                                owner   : itemArr[2],
-                                group   : itemArr[3],
-                                size    : itemArr[4],
-                                date    : `${itemArr[5]} ${itemArr[6]}`,
-                                name    : itemArr[7],
-                                link    : itemArr[9] || ''
-                            }
-                            itemObj.icon = this.getFileIcon(itemObj.type, itemObj.name)
-                            list[index] = itemObj
-                        })                        
-                        this.laList = list
+                        this.laList = this.listFormat(res.stdout)
                         this.lastPwd = this.pwd
                         this.selectedIndex = 0
-                        this.loading = false
                     })
             },
-            getFileIcon(type, name) {
-                const suffix = type === '-' ? name.split('.').pop() : ''
-                // 目录
-                if (type === 'd') return require('src/assets/sftp-icons/folder-other.svg')
-                // 链接
-                if (type === 'l') return require('src/assets/sftp-icons/folder-shared.svg')
-                // 管理文件
-                if (type === 'p') return 'p'
-                // 设备文件
-                if (type === 'b') return 'b'
-                // 字符设备文件
-                if (type === 'c') return 'c'
-                // 套接字文件
-                if (type === 's') return 's'
-                // 普通文件
-                if (suffix === 'js') return require('src/assets/sftp-icons/javascript.svg')
-                // 普通文件
-                if (type === '-') return require('src/assets/sftp-icons/document.svg')
-            },
-            select(item, index) {
-                this.selectedIndex = index
-                this.clickNum += 1
-                if (this.clickNum >= 2) {
-                    this.clickNum = 0
-                    return this.doubleClick(item, index)
-                }
-                setTimeout(() => this.clickNum = 0, 200)
-            },
-            doubleClick(item, index) {
-                const { name } = item
+            dirEnter() {
+                const { name } = this.laList[this.selectedIndex]
                 this.pwd = (() => {
                     const arr = this.pwd.split('/').filter(arrItem => arrItem)
                     name === '..' ? arr.pop() : arr.push(name)
@@ -171,9 +183,6 @@
                 if (this.laList[this.selectedIndex].name === '.') return this.selectedIndex = 1
                 // This item is hidden
                 if (this.hideItem(this.laList[this.selectedIndex])) return this.moveSelected(action)
-            },
-            dirEnter() {
-                this.doubleClick(this.laList[this.selectedIndex], this.selectedIndex)
             },
             dirBack() {
                 this.pwd = (() => {
@@ -204,10 +213,7 @@
                     this.loading = false
                     this.la()
                 })
-                .catch(err => {
-                    this.loading = false
-                    console.log(err);
-                })
+                .catch(err => this.loading = false)
             },
         },
         created() {
