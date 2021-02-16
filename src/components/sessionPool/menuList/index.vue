@@ -3,8 +3,8 @@
             context-menu 
             @before-show="$emit('click', listItem)">
         <q-list dense style="min-width: 100px">
-            <q-item clickable v-close-popup>
-                <q-item-section>打开</q-item-section>
+            <q-item clickable v-close-popup @click="$emit('login', listItem)">
+                <q-item-section>连接</q-item-section>
             </q-item>
             <q-separator/>
             <q-item clickable v-close-popup @click="$emit('remove', listItem, listIndex)">

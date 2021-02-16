@@ -10,7 +10,7 @@
                     class="list-item cursor-inherit"
                     clickable v-ripple
                     @click="selected = item.id"
-                    @dblclick="link(item)">
+                    @dblclick="login(item)">
                 <q-item-section avatar>
                     <q-avatar rounded size="md">
                         <q-btn icon="dns" size="sm" flat :color="selected === item.id ? 'white' : 'primary'"/>
@@ -23,6 +23,7 @@
                            type="text"
                            ref="rename-input"
                            class="no-outline no-border"
+                           :placeholder="item.host"
                            @blur="renameClose"
                            @keydown.enter="$refs['rename-input'][0].blur()">
                 </q-item-section>
@@ -33,8 +34,9 @@
                                   :class="{ 'text-white': selected === item.id }">{{ item.host }}
                     </q-item-label>
                 </q-item-section>
-                <menu-list :listItem="item" 
-                           :listIndex="index" 
+                <menu-list :listItem="item"
+                           :listIndex="index"
+                           @login="login"
                            @click="selected = item.id" 
                            @rename="renameOpen"
                            @remove="removeItem"/>
@@ -78,11 +80,19 @@ export default {
             })
             this.list = arr
         },
-        link(item) {
+        // 连接会话
+        login(item) {
+            console.log(item);
+            const { id, host, port, username, password } = item
             this.loading = true
-            setTimeout(() => {
-                this.loading = false
-            }, 500)
+            this.tools.ssh({
+                params: { host, port, username, password },
+                success: ssh => {
+                    this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
+                    this.$router.push({ path: '/sftp' })
+                },
+                finish: () => this.loading = false
+            })
         },
         // 重命名开始
         renameOpen(item, index) {

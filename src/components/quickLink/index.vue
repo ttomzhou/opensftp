@@ -52,29 +52,17 @@
             sshLogin() {
                 this.loading = true
                 const { host, port, username, password } = this
-                const ssh = new NodeSSH()
-                ssh.connect({
-                    host,
-                    username,
-                    port,
-                    password,
-                    tryKeyboard: true,
-                    onKeyboardInteractive: (name, instructions, instructionsLang, prompts, finish) => {
-                        if (prompts.length > 0 && prompts[0].prompt.toLowerCase().includes('password')) finish([password])
+                this.tools.ssh({
+                    params: { host, port, username, password },
+                    success: ssh => {
+                        this.$store.commit('sshInfo/SSH_ADD', { host, port, username, password,
+                            callback: sshKey => {
+                                this.$store.commit('sshInfo/SSH_TAGS_ADD', sshKey)
+                                this.$router.push({ path: '/sftp' })
+                            }
+                        })
                     },
-                })
-                .then(() => {
-                    this.loading = false
-                    this.$store.commit('sshInfo/SSH_ADD', { host, port, username, password,
-                        callback: sshKey => {
-                            this.$store.commit('sshInfo/SSH_TAGS_ADD', sshKey)
-                            this.$router.push({ path: '/sftp' })
-                        }
-                    })
-                })
-                .catch(err => {
-                    this.loading = false
-                    console.log(err);
+                    finish: () => this.loading = false
                 })
             },
         },

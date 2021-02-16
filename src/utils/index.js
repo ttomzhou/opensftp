@@ -1,6 +1,8 @@
 import { Dialog, extend } from 'quasar'
 import CryptoJS from 'crypto-js'
 
+const { NodeSSH } = require('node-ssh')
+
 function confirm(obj) {
     if (typeof obj === 'string') obj = {
         message: obj
@@ -173,6 +175,29 @@ function getUrlParams(url, name) {
         : unescape(r[2]);
 }
 
+function ssh(obj) {
+    const ssh = new NodeSSH()
+    const { host, port, username, password } = obj.params
+    ssh.connect({
+        host,
+        port,
+        username,
+        password,
+        tryKeyboard: true,
+        onKeyboardInteractive: (name, instructions, instructionsLang, prompts, finish) => {
+            if (prompts.length > 0 && prompts[0].prompt.toLowerCase().includes('password')) finish([password])
+        },
+    })
+    .then(() => {
+        if (obj.success) obj.success(ssh)
+        if (obj.finish)  obj.finish()
+    })
+    .catch(err => {
+        if (obj.error)  obj.error(err)
+        if (obj.finish) obj.finish()
+    })
+}
+
 export default {
     confirm,
     clone,
@@ -182,4 +207,5 @@ export default {
     formatDate,
     formatTime,
     getUrlParams,
+    ssh,
 }
