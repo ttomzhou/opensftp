@@ -42,10 +42,10 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: '192.168.0.100',
-                port: '22',
-                username: 'xingrong',
-                password: 'codeMaster.95',
+                host: 'products.srun.com',
+                port: '8022',
+                username: 'root',
+                password: 'Srun4000',
             };
         },
         methods: {
@@ -66,11 +66,11 @@
                 .then(() => {
                     this.loading = false
                     this.$store.commit('sshInfo/SSH_ADD', { host, port, username, password,
-                        callback: sshKey => this.$store.commit('sshInfo/SSH_TAGS_ADD', {
-                            sshKey,
-                        })
+                        callback: sshKey => {
+                            this.$store.commit('sshInfo/SSH_TAGS_ADD', sshKey)
+                            this.$router.push({ path: '/sftp' })
+                        }
                     })
-                    this.$router.push({ path: '/sftp' })
                 })
                 .catch(err => {
                     this.loading = false

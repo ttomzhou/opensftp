@@ -6,7 +6,7 @@
                :class="{ active: $store.state.sshInfo.sshActive === index }"
                @click="$store.commit('sshInfo/CHANGE_ACTIVE', index)">
             <q-icon name="dns"/>
-            <div class="label">{{ activeSSH().host }}</div>
+            <div class="label">{{ activeSSH().name }}</div>
             <q-space/>
             <q-btn flat round size="xs" icon="close" @click="closeSSH(index)"/>
         </q-bar>
