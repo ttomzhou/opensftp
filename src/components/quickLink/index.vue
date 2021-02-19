@@ -40,10 +40,10 @@
             return {
                 loading: false,
                 showPwd: false,
-                host: 'products.srun.com',
-                port: '8022',
-                username: 'root',
-                password: 'Srun4000',
+                host: '',
+                port: '',
+                username: '',
+                password: '',
             };
         },
         methods: {
