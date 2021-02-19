@@ -31,8 +31,6 @@
 <script>
     import svgQuickLink from 'src/components/svg/quickLink'
 
-    const { NodeSSH } = require('node-ssh')
-
     export default {
         name: "QuickLink",
         components: {

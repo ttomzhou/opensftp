@@ -193,8 +193,13 @@ function ssh(obj) {
         if (obj.finish)  obj.finish()
     })
     .catch(err => {
-        if (obj.error)  obj.error(err)
         if (obj.finish) obj.finish()
+        confirm({
+            message: `无法连接至服务器 ${host}`,
+            confirm: () => {
+                if (obj.error)  obj.error(err)
+            }
+        })
     })
 }
 

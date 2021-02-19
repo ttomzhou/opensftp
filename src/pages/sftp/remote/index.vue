@@ -11,7 +11,7 @@
             <button type="button" class="btn-enter" @click="la">
                 <q-icon name="chevron_right"/>
             </button>
-            <button type="button" class="btn-enter">
+            <button type="button" class="btn-enter" @click="la">
                 <q-icon name="refresh"/>
             </button>
         </div>
@@ -37,21 +37,25 @@
                     <img :src="getFileIcon(item)" alt="">
                 </div>
                 <div class="item name">{{ item.name }}</div>
-                <div class="item size">{{ fileSize(item) }}</div>
-                <div class="item date">{{ item.date }}</div>
-                <div class="item owner">{{ item.owner }}</div>
-                <div class="item group">{{ item.group }}</div>
+                <div v-show="item.name !== '..'" class="item size">{{ fileSize(item) }}</div>
+                <div v-show="item.name !== '..'" class="item date">{{ item.date }}</div>
+                <div v-show="item.name !== '..'" class="item owner">{{ item.owner }}</div>
+                <div v-show="item.name !== '..'" class="item group">{{ item.group }}</div>
                 <!-- 右键菜单 -->
-                <menu-list :listItem="item" :listIndex="index" @click="listIndex => selectedIndex = listIndex"/>
+                <menu-list v-if="item.name !== '..'"
+                           :listItem="item" 
+                           :listIndex="index"
+                           @click="listIndex => selectedIndex = listIndex"
+                           @download="download"/>
             </div>
         </div>
     </q-scroll-area>
 </template>
 
 <script>
+    import fs from 'fs'
+    import path from 'path'
     import menuList from '../menuList'
-
-    const { NodeSSH } = require('node-ssh')
 
     export default {
         name: 'SFTPRemote',
@@ -78,7 +82,7 @@
             }
         },
         watch: {
-            '$store.state.sshInfo.sshTags': function () {
+            '$store.state.sshInfo.sshActive': function () {
                 this.sshLogin()
             }
         },
@@ -148,13 +152,12 @@
         },
         methods: {
             la() {
-                // 若当前目录未发生变化，则不发送指令
-                if (this.pwd === this.lastPwd) return
                 this.loading = true
                 this.ssh.execCommand('ls -la --time-style="+%Y-%m-%d %H:%I:%S"', { cwd: this.pwd })
                     .then(res => {
                         this.loading = false
                         if (res.stderr) {
+                            if (res.stderr.endsWith('No such file or directory')) res.stderr = `目录 ${this.pwd} 不存在`
                             this.pwd = this.lastPwd
                             return this.tools.confirm(res.stderr)
                         }
@@ -192,28 +195,48 @@
                 })()
                 this.la()
             },
+            // 连接 SSH
             sshLogin() {
+                // 针对开发模式
                 if (!this.$store.state.sshInfo.sshTags.length) return this.$router.push({ path: '/' })
                 this.loading = true
                 const { sshList, sshTags, sshActive } = this.$store.state.sshInfo
                 const sshInfo = sshList.get(sshTags[sshActive].sshKey)
                 const { host, port, username, password } = sshInfo
-                this.ssh = new NodeSSH()
-                this.ssh.connect({
-                    host,
-                    username,
-                    port,
-                    password,
-                    tryKeyboard: true,
-                    onKeyboardInteractive: (name, instructions, instructionsLang, prompts, finish) => {
-                        if (prompts.length > 0 && prompts[0].prompt.toLowerCase().includes('password')) finish([password])
+                this.tools.ssh({
+                    params: { host, port, username, password },
+                    success: ssh => {
+                        this.ssh     = ssh
+                        this.loading = false
+                        this.lastPwd = ''
+                        this.la()
                     },
+                    finish: () => this.loading = false,
                 })
-                .then(() => {
-                    this.loading = false
-                    this.la()
-                })
-                .catch(err => this.loading = false)
+            },
+            // 下载
+            download(item) {
+                if (item.type === 'd') {
+                     fs.mkdirSync(path.join('/', item.name), { recursive: true })
+                    this.ssh.getDirectory(path.join('/', item.name), `${this.lastPwd}/${item.name}`)
+                        .then(Contents => {
+                            this.notify.success(`目录 ${item.name} 下载成功`)
+                            console.log(Contents);
+                        }, err => {
+                            this.notify.error(`目录 ${item.name} 下载失败`)
+                            console.log(err)
+                        });
+                }
+                if (item.type === '-') {
+                    this.ssh.getFile(path.join('/', item.name), `${this.lastPwd}/${item.name}`)
+                        .then(Contents => {
+                            this.notify.success(`文件 ${item.name} 下载成功`)
+                            console.log(Contents);
+                        }, err => {
+                            this.notify.error(`文件 ${item.name} 下载失败`)
+                            console.log(err)
+                        })
+                }
             },
         },
         created() {
@@ -258,6 +281,7 @@
             outline: none
             background: none
         .pwd-input
+            width: calc( 100% - 60px )
             padding: 0 5px
         .btn-enter
             width: 30px

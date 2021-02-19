@@ -3,13 +3,15 @@
             context-menu 
             @before-show="$emit('click', listIndex)">
         <q-list dense style="min-width: 100px">
-            <q-item clickable v-close-popup>
+            <q-item clickable v-close-popup v-show="listItem.type === '-'">
                 <q-item-section>以 Webstorm 编辑</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup>
+            <q-item v-show="listItem.type === '-' || listItem.type === 'd'" 
+                    clickable v-close-popup 
+                    @click="$emit('download', listItem)">
                 <q-item-section>下载</q-item-section>
             </q-item>
-            <q-item clickable>
+            <q-item clickable v-show="listItem.type === '-'">
                 <q-item-section>选择打开方式</q-item-section>
                 <q-item-section side>
                     <q-icon name="keyboard_arrow_right"/>

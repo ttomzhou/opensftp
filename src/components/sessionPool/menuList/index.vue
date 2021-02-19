@@ -14,7 +14,7 @@
                 <q-item-section>重命名</q-item-section>
             </q-item>
             <q-separator/>
-            <q-item clickable v-close-popup>
+            <q-item clickable v-close-popup @click="$emit('showAttr', listItem)">
                 <q-item-section>属性</q-item-section>
             </q-item>
         </q-list>
@@ -22,31 +22,31 @@
 </template>
 
 <script>
-    export default {
-        name: 'SessionItemMenuList',
-        props: {
-            listItem: {
-                type: Object,
-                default: {},
-            },
-            listIndex: {
-                type: Number,
-                default: 0,
-            },
+export default {
+    name: 'SessionItemMenuList',
+    props: {
+        listItem: {
+            type: Object,
+            default: {},
         },
-        data() {
-            return {
-            }
+        listIndex: {
+            type: Number,
+            default: 0,
         },
-        watch: {
-        },
-        computed: {
-        },
-        methods: {
-            rename() {
-            }
-        },
-        created() {
+    },
+    data() {
+        return {
         }
+    },
+    watch: {
+    },
+    computed: {
+    },
+    methods: {
+        rename() {
+        }
+    },
+    created() {
     }
+}
 </script>

@@ -39,19 +39,23 @@
                            @login="login"
                            @click="selected = item.id" 
                            @rename="renameOpen"
-                           @remove="removeItem"/>
+                           @remove="removeItem"
+                           @showAttr="showAttr"/>
             </q-item>
         </q-list>
+        <attr-panel ref="attr-panel" @update="getList"/>
     </q-scroll-area>
 </template>
 
 <script>
 import menuList from './menuList'
+import attrPanel from './attrPanel'
 
 export default {
     name: 'SessionPool',
     components: {
         'menu-list': menuList,
+        'attr-panel': attrPanel,
     },
     data() {
         return {
@@ -82,7 +86,6 @@ export default {
         },
         // 连接会话
         login(item) {
-            console.log(item);
             const { id, host, port, username, password } = item
             this.loading = true
             this.tools.ssh({
@@ -91,7 +94,7 @@ export default {
                     this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
                     this.$router.push({ path: '/sftp' })
                 },
-                finish: () => this.loading = false
+                finish: () => this.loading = false,
             })
         },
         // 重命名开始
@@ -122,6 +125,10 @@ export default {
                 cancel: () => {}
             })
         },
+        // 显示属性
+        showAttr(item) {
+            this.$refs['attr-panel'].open(item)
+        }
     },
     created() {
         this.getList()
