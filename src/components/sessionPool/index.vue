@@ -42,9 +42,7 @@
                         {{ loading === index ? '正在连接...' : item.host }}
                     </q-item-label>
                 </q-item-section>
-                <menu-list :listItem="item"
-                           :listIndex="index"
-                           @click="openMenu = index"
+                <menu-list @click="openMenu = index"
                            @close="selectSession(index)"
                            @login="login(item, index)"
                            @rename="renameOpen(item, index)"
@@ -97,15 +95,18 @@ export default {
         // 连接会话
         login(item, index) {
             const { id, host, port, username, password } = item
-            this.loading = index
-            this.tools.ssh({
-                params: { host, port, username, password },
-                success: ssh => {
-                    this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
-                    this.$router.push({ path: '/sftp' })
-                },
-                finish: () => this.loading = null,
-            })
+            this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
+            this.$router.push({ path: '/sftp' })
+            // const { id, host, port, username, password } = item
+            // this.loading = index
+            // this.tools.ssh({
+            //     params: { host, port, username, password },
+            //     success: ssh => {
+            //         this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
+            //         this.$router.push({ path: '/sftp' })
+            //     },
+            //     finish: () => this.loading = null,
+            // })
         },
         // 重命名开始
         renameOpen(item, index) {
@@ -123,7 +124,7 @@ export default {
             })
             this.renameItem = {}
             this.getList()
-            this.itemFocus(this.selected)
+            this.sessionFocus()
         },
         // 删除项目
         removeItem(item, index) {
@@ -140,21 +141,21 @@ export default {
         showAttr(item, index) {
             this.$refs['attr-panel'].open(item)
         },
-        // 移动光标
+        // 移动聚焦元素
         moveFocus(action) {
             if (action === 'up' && this.selected !== 0) this.selected -= 1
             if (action === 'down' && this.selected !== this.list.length - 1) this.selected += 1
-            this.itemFocus(this.selected)
+            this.sessionFocus()
         },
         // 会话聚焦
-        itemFocus(index) {
-            this.$refs[`session-${index}`][0].$el.focus()
+        sessionFocus() {
+            this.$refs[`session-${this.selected}`][0].$el.focus()
         },
         // 选择会话
         selectSession(index) {
             this.openMenu = null
             this.selected = index
-            this.itemFocus(this.selected)
+            this.sessionFocus()
         },
     },
     created() {

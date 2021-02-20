@@ -1,6 +1,11 @@
 <template>
     <q-bar class="q-electron-drag">
-        <div class="text-weight-bold">Open SFTP</div>
+        <q-btn style="font-size: 1rem" class="no-border-radius" flat no-caps>Open SFTP
+            <header-menu/>
+        </q-btn>
+        <!-- <div class="text-weight-bold">Open SFTP
+            <header-menu/>
+        </div> -->
         <session-tag/>
 
         <q-space />
@@ -13,11 +18,13 @@
 
 <script>
 import sessionTag from 'src/components/sessionTag'
+import headerMenu from 'src/components/headerMenu'
 
 export default {
     name: 'HeaderBar',
     components: {
-        'session-tag': sessionTag
+        'session-tag': sessionTag,
+        'header-menu': headerMenu,
     },
     data() {
         return {};

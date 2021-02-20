@@ -1,14 +1,16 @@
 <template>
     <q-menu touch-position
-            context-menu 
-            @before-show="$emit('click', listIndex)">
+            context-menu
+            content-class="bg-aero-light"
+            @before-show="$emit('click')"
+            @before-hide="$emit('close')">
         <q-list dense style="min-width: 100px">
             <q-item clickable v-close-popup v-show="listItem.type === '-'">
                 <q-item-section>以 Webstorm 编辑</q-item-section>
             </q-item>
             <q-item v-show="listItem.type === '-' || listItem.type === 'd'" 
                     clickable v-close-popup 
-                    @click="$emit('download', listItem)">
+                    @click="$emit('download')">
                 <q-item-section>下载</q-item-section>
             </q-item>
             <q-item clickable v-show="listItem.type === '-'">
@@ -56,10 +58,6 @@
                 type: Object,
                 default: {},
             },
-            listIndex: {
-                type: Number,
-                default: 0,
-            }
         },
         data() {
             return {

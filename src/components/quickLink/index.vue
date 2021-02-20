@@ -21,7 +21,7 @@
             <q-btn color="primary" 
                    unelevated
                    :loading="loading"
-                   label="连接"
+                   label="快速连接"
                    class="q-mt-md full-width"
                    @click="sshLogin"/>
         </div>

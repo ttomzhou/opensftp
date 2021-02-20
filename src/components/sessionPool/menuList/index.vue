@@ -43,16 +43,6 @@
 <script>
 export default {
     name: 'SessionItemMenuList',
-    props: {
-        listItem: {
-            type: Object,
-            default: {},
-        },
-        listIndex: {
-            type: Number,
-            default: 0,
-        },
-    },
     data() {
         return {
         }

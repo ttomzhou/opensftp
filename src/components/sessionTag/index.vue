@@ -5,7 +5,7 @@
                :key="index"
                :color="$store.state.sshInfo.sshActive === index ? 'teal-7' : 'blue-10'"
                class="no-border-radius"
-               unelevated
+               unelevated no-caps
                @click="changeSession(index)">
             <q-icon name="dns"/>
             <div class="label q-mx-sm" style="font-size: .85rem">{{ item.name }}</div>

@@ -12,7 +12,7 @@
             </q-bar>
             <q-card-section>
                 <div>
-                    <q-input label="会话名称" v-model="session.name"/>
+                    <q-input label="会话名称" v-model="session.name" :placeholder="session.host"/>
                         <q-input label="地址" v-model="session.host">
                         <template v-slot:after>
                             <q-input style="width: 80px" v-model="session.port" label="端口" />
