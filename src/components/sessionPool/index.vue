@@ -1,19 +1,24 @@
 <template>
     <q-scroll-area class="full-height">
-        <q-inner-loading :showing="loading" style="z-index: 99">
-            <q-spinner-gears size="50px" color="primary" />
-        </q-inner-loading>
         <q-list dense>
             <q-item v-for="(item, index) in list" 
                     :key="item.id"
-                    :class="{ active: selected === item.id }"
+                    :ref="'session-' + index"
+                    :class="{ 'focus-temp': renameItem.id === item.id || openMenu === index }"
                     class="list-item cursor-inherit"
                     clickable v-ripple
-                    @click="selected = item.id"
-                    @dblclick="login(item)">
+                    @click="selectSession(index)"
+                    @dblclick="login(item, index)"
+                    @keydown.enter="login(item, index)"
+                    @keydown.f2="renameOpen(item, index)"
+                    @keydown.delete="removeItem(item)"
+                    @keydown.alt.r="showAttr(item)"
+                    @keydown.up="moveFocus('up')"
+                    @keydown.down="moveFocus('down')">
                 <q-item-section avatar>
                     <q-avatar rounded size="md">
-                        <q-btn icon="dns" size="sm" flat :color="selected === item.id ? 'white' : 'primary'"/>
+                        <q-spinner-gears v-if="loading === index" class="session-icon" />
+                        <q-btn v-else class="session-icon" icon="dns" size="sm" flat/>
                     </q-avatar>
                 </q-item-section>
                 <q-item-section>
@@ -22,25 +27,29 @@
                            v-show="renameItem.id === item.id"
                            type="text"
                            ref="rename-input"
-                           class="no-outline no-border"
+                           class="rename-input no-outline no-border no-padding"
                            :placeholder="item.host"
                            @blur="renameClose"
-                           @keydown.enter="$refs['rename-input'][0].blur()">
+                           @keydown.esc="$refs['rename-input'][index].blur()"
+                           @keydown.stop.delete=""
+                           @keydown.stop.up=""
+                           @keydown.stop.down=""
+                           @keydown.stop.alt.r=""
+                           @keydown.stop.enter="$refs['rename-input'][index].blur()">
                 </q-item-section>
                 <q-item-section side>
-                    <q-item-label style="width: 100px"
-                                  caption
-                                  class=""
-                                  :class="{ 'text-white': selected === item.id }">{{ item.host }}
+                    <q-item-label style="width: 100px" caption class="site-label">
+                        {{ loading === index ? '正在连接...' : item.host }}
                     </q-item-label>
                 </q-item-section>
                 <menu-list :listItem="item"
                            :listIndex="index"
-                           @login="login"
-                           @click="selected = item.id" 
-                           @rename="renameOpen"
-                           @remove="removeItem"
-                           @showAttr="showAttr"/>
+                           @click="openMenu = index"
+                           @close="selectSession(index)"
+                           @login="login(item, index)"
+                           @rename="renameOpen(item, index)"
+                           @remove="removeItem(item, index)"
+                           @showAttr="showAttr(item, index)"/>
             </q-item>
         </q-list>
         <attr-panel ref="attr-panel" @update="getList"/>
@@ -59,8 +68,9 @@ export default {
     },
     data() {
         return {
-            loading: false,
-            selected: '',
+            loading: null,
+            selected: null,
+            openMenu: null,
             renameItem: {},
             list: [],
         }
@@ -85,16 +95,16 @@ export default {
             this.list = arr
         },
         // 连接会话
-        login(item) {
+        login(item, index) {
             const { id, host, port, username, password } = item
-            this.loading = true
+            this.loading = index
             this.tools.ssh({
                 params: { host, port, username, password },
                 success: ssh => {
                     this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
                     this.$router.push({ path: '/sftp' })
                 },
-                finish: () => this.loading = false,
+                finish: () => this.loading = null,
             })
         },
         // 重命名开始
@@ -113,6 +123,7 @@ export default {
             })
             this.renameItem = {}
             this.getList()
+            this.itemFocus(this.selected)
         },
         // 删除项目
         removeItem(item, index) {
@@ -126,9 +137,25 @@ export default {
             })
         },
         // 显示属性
-        showAttr(item) {
+        showAttr(item, index) {
             this.$refs['attr-panel'].open(item)
-        }
+        },
+        // 移动光标
+        moveFocus(action) {
+            if (action === 'up' && this.selected !== 0) this.selected -= 1
+            if (action === 'down' && this.selected !== this.list.length - 1) this.selected += 1
+            this.itemFocus(this.selected)
+        },
+        // 会话聚焦
+        itemFocus(index) {
+            this.$refs[`session-${index}`][0].$el.focus()
+        },
+        // 选择会话
+        selectSession(index) {
+            this.openMenu = null
+            this.selected = index
+            this.itemFocus(this.selected)
+        },
     },
     created() {
         this.getList()
@@ -139,7 +166,11 @@ export default {
 <style scoped lang="sass">
     .list-item
         border-radius: 4px
-        &.active
+        .session-icon
+            color: $primary
+        &:focus,&.focus-temp
             background: $primary
             color: #FFFFFF
+            .session-icon,.site-label
+                color: #FFFFFF
 </style>

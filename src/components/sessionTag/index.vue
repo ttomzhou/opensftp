@@ -4,7 +4,7 @@
         <q-btn v-for="(item, index) in tagList"
                :key="index"
                :color="$store.state.sshInfo.sshActive === index ? 'teal-7' : 'blue-10'"
-               class=""
+               class="no-border-radius"
                unelevated
                @click="changeSession(index)">
             <q-icon name="dns"/>

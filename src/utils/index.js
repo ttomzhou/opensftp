@@ -11,8 +11,8 @@ function confirm(obj) {
         title: obj.title || '提示',
         message: obj.message || '',
         cancel: !obj.cancel ? '' : '取消',
-        // ok: '确认',
-        persistent: true,
+        'no-backdrop-dismiss': true,
+        'no-esc-dismiss': false,
     })
         .onOk(() => {
             if (obj.confirm) obj.confirm();
@@ -56,7 +56,6 @@ function add0(str) {
 
 /**
  * 流量格式化
- * @author ll@srun.com
  * @method
  * @param       {Number}    flow        传入流量数值
  * @param       {Number}    mode        传入进位方式 (默认 1024)

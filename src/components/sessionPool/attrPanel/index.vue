@@ -1,10 +1,11 @@
 <template>
     <q-dialog v-model="show"
-              persistent
+              :no-backdrop-dismiss="true"
+              :no-esc-dismiss="false"
               transition-show="slide-up"
               transition-hide="slide-down">
         <q-card class="attr-panel disable-copy">
-            <q-bar>
+            <q-bar class="bg-primary text-white">
                 <div>{{ panelName }}</div>
                 <q-space />
                 <q-btn dense flat icon="close" v-close-popup/>

@@ -41,8 +41,8 @@
                 loading: false,
                 showPwd: false,
                 host: '',
-                port: '',
-                username: '',
+                port: '22',
+                username: 'root',
                 password: '',
             };
         },
