@@ -2,8 +2,8 @@
     "name": "opensftp",
     "version": "0.0.1",
     "description": "Open SFTP Client 基于 Electron 与 Vue 的 SFTP 跨平台客户端",
-    "productName": "Quasar App",
-    "author": "xingrong <xingrong.dev@gmail.com>",
+    "productName": "OpenSFTP",
+    "author": "xingrong.dev@gmail.com",
     "private": true,
     "scripts": {
         "test": "echo \"No test specified\" && exit 0"
@@ -20,14 +20,13 @@
     "devDependencies": {
         "@quasar/app": "^2.0.0",
         "devtron": "^1.4.0",
-        "electron": "^11.2.3",
+        "electron": "^9.0.0",
         "electron-builder": "^22.4.0",
         "electron-debug": "^3.0.1",
         "electron-devtools-installer": "^3.0.0",
         "electron-packager": "^14.1.1"
     },
     "browserslist": [
-        "ie >= 11",
         "last 10 Chrome versions",
         "last 10 Firefox versions",
         "last 4 Edge versions",
