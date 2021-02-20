@@ -63,7 +63,7 @@ function add0(str) {
  * @param       {Number}    promotion   传入流量转换后的对比数  (默认 1024)
  * @return      {String}                格式化结果
  */
-function formatFlow(flow, mode = 1024, unit = 'B', promotion = 1024) {
+function formatFlow(flow, mode = 1024, unit = 'B', promotion = 1024, precise = 2) {
     flow = Number(flow);
     if (!flow) return `0 ${unit}`;
     const unitList = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -75,8 +75,8 @@ function formatFlow(flow, mode = 1024, unit = 'B', promotion = 1024) {
         const min = Math.pow(mode, i);
         const max = Math.pow(mode, i + 1);
         if (min <= flow && flow < max) {
-            if ((flow / min) >= promotion) return ((flow / min)/mode).toFixed(2) + ' ' + unitList[i+1];
-            if ((flow / min) < promotion)  return (flow / min).toFixed(2) + ' ' + unitList[i];
+            if ((flow / min) >= promotion) return ((flow / min)/mode).toFixed(precise) + ' ' + unitList[i+1];
+            if ((flow / min) < promotion)  return (flow / min).toFixed(precise) + ' ' + unitList[i];
         }
     }
 }

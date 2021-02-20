@@ -4,7 +4,7 @@
             <q-spinner-gears size="50px" color="primary" />
         </q-inner-loading>
         <div class="fs-control flex">
-            <input class="pwd-input" type="text" v-model="pwd" 
+            <input class="pwd-input" type="text" v-model.trim="pwd" 
                    @keydown.enter="la"
                    @blur="pwd = lastPwd">
             <q-space/>
@@ -104,7 +104,7 @@ export default {
         },
         fileSize() {
             // 只有文件类型才有文件大小概念
-            return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size)
+            return item => item.type === 'd' ? '-' : this.tools.formatFlow(item.size, 1024, 'B', 1024, 0)
         },
         listFormat() {
             return stdout => {
@@ -112,7 +112,7 @@ export default {
                 stdout.split('\n').forEach(item => {
                     const itemArr = item.split(' ').filter(tempItem => tempItem)
                     // 忽略 total
-                    if (itemArr[0] === 'total') return
+                    if (itemArr.length < 8) return
                     // 忽略 .
                     if (itemArr[7] === '.') return
                     // push 到 list 数组
@@ -142,20 +142,31 @@ export default {
             return item => {
                 const { type, name } = item
                 const suffix = type === '-' ? name.split('.').pop() : ''
+                // ..
+                if (name === '..') return require('src/assets/sftp-icons/folder-other.svg')
                 // 目录
-                if (type === 'd') return require('src/assets/sftp-icons/folder-other.svg')
+                if (type === 'd')  return require('src/assets/sftp-icons/folder.svg')
                 // 链接
-                if (type === 'l') return require('src/assets/sftp-icons/folder-shared.svg')
+                if (type === 'l')  return require('src/assets/sftp-icons/folder-shared.svg')
                 // 管理文件
-                if (type === 'p') return 'p'
+                if (type === 'p')  return 'p'
                 // 设备文件
-                if (type === 'b') return 'b'
+                if (type === 'b')  return 'b'
                 // 字符设备文件
-                if (type === 'c') return 'c'
+                if (type === 'c')  return 'c'
                 // 套接字文件
-                if (type === 's') return 's'
-                // 普通文件
-                if (suffix === 'js') return require('src/assets/sftp-icons/javascript.svg')
+                if (type === 's')  return 's'
+                // 根据后缀匹配
+                if (suffix === 'html') return require('src/assets/sftp-icons/html.svg')
+                if (suffix === 'css')  return require('src/assets/sftp-icons/css.svg')
+                if (suffix === 'js')   return require('src/assets/sftp-icons/javascript.svg')
+                if (suffix === 'md')   return require('src/assets/sftp-icons/readme.svg')
+                if (suffix === 'sh')   return require('src/assets/sftp-icons/console.svg')
+                if (suffix === 'go')   return require('src/assets/sftp-icons/go.svg')
+                if (suffix === 'php')   return require('src/assets/sftp-icons/php.svg')
+                if (['png', 'jpg', 'jpeg', 'gif', 'tiff', 'ico', 'icns'].includes(suffix)) return require('src/assets/sftp-icons/image.svg')
+                if (['ini', 'conf'].includes(suffix)) return require('src/assets/sftp-icons/settings.svg')
+                if (['tar', 'gz', 'tgz', 'zip', 'rar', '7z'].includes(suffix)) return require('src/assets/sftp-icons/zip.svg')
                 // 普通文件
                 if (type === '-') return require('src/assets/sftp-icons/document.svg')
             }

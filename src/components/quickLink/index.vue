@@ -2,13 +2,13 @@
     <div class="full-height q-pa-md flex flex-center">
         <div class="container text-center">
             <svg-quickLink class="illustration"/>
-            <q-input label="地址" v-model="host">
+            <q-input label="地址" v-model.trim="host">
                 <template v-slot:after>
-                    <q-input style="width: 80px" v-model="port" label="端口" />
+                    <q-input style="width: 80px" v-model.trim="port" label="端口" type="number"/>
                 </template>
             </q-input>
-            <q-input label="用户" v-model="username"/>
-            <q-input label="密码" v-model="password" 
+            <q-input label="用户" v-model.trim="username"/>
+            <q-input label="密码" v-model.trim="password" 
                      :type="showPwd ? 'text' : 'password'" 
                      @keydown.enter="sshLogin">
                 <template v-slot:append>
