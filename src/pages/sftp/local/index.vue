@@ -66,6 +66,7 @@
  */
 import fs from 'fs'
 import path from 'path'
+import { exec } from 'child_process'
 import menuList from '../menuList'
 
 export default {
@@ -105,9 +106,9 @@ export default {
                 stdout.split('\n').forEach(item => {
                     const itemArr = item.split(' ').filter(tempItem => tempItem)
                     // 忽略 total
-                    if (itemArr.length < 8) return
+                    if (itemArr.length < 3) return
                     // 忽略 .
-                    if (itemArr[7] === '.') return
+                    if (itemArr[9] === '.') return
                     // push 到 list 数组
                     list.push({
                         // 文件类型
@@ -121,12 +122,16 @@ export default {
                         // 文件大小
                         size    : itemArr[4],
                         // 创建日期
-                        date    : `${itemArr[5]} ${itemArr[6]}`,
+                        date    : `${itemArr[8]}-${itemArr[5]}-${itemArr[6]} ${itemArr[7]}`,
                         // 文件名称
-                        name    : itemArr[7],
+                        name    : itemArr[9],
                         // 链接地址
-                        link    : itemArr[9] || ''
+                        link    : itemArr[11] || ''
                     })
+                })
+                // drwxr-xr-x  0 root  wheel   640  1  1 16:00:00 2020 ..
+                if (!list.length) list.push({
+                    name: '..',
                 })
                 return list
             }
@@ -156,7 +161,7 @@ export default {
                 if (suffix === 'md')   return require('src/assets/sftp-icons/readme.svg')
                 if (suffix === 'sh')   return require('src/assets/sftp-icons/console.svg')
                 if (suffix === 'go')   return require('src/assets/sftp-icons/go.svg')
-                if (suffix === 'php')   return require('src/assets/sftp-icons/php.svg')
+                if (suffix === 'php')  return require('src/assets/sftp-icons/php.svg')
                 if (['png', 'jpg', 'jpeg', 'gif', 'tiff', 'ico', 'icns'].includes(suffix)) return require('src/assets/sftp-icons/image.svg')
                 if (['ini', 'conf'].includes(suffix)) return require('src/assets/sftp-icons/settings.svg')
                 if (['tar', 'gz', 'tgz', 'zip', 'rar', '7z'].includes(suffix)) return require('src/assets/sftp-icons/zip.svg')
@@ -169,21 +174,18 @@ export default {
         // 列出当前路径文件列表
         la() {
             this.loading = true
-            this.ssh.execCommand('ls -la --time-style="+%Y-%m-%d %H:%I:%S"', { cwd: this.pwd })
-                .then(res => {
-                    this.loading = false
-                    if (res.stderr) {
-                        if (res.stderr.endsWith('No such file or directory')) res.stderr = `目录 ${this.pwd} 不存在`
-                        this.pwd = this.lastPwd
-                        return this.tools.confirm(res.stderr)
-                    }
-                    this.list = this.listFormat(res.stdout)
-                    this.lastPwd = this.pwd
-                    this.selected = 0
-                    this.$nextTick(() => {
-                        this.fileFocus()
-                    })
+            exec('ls -laT', { cwd: this.pwd }, (error, stdout, stderr) => {
+                this.loading = false
+                if (stderr) {
+                    return this.tools.confirm(stderr)
+                }
+                this.list = this.listFormat(stdout)
+                this.lastPwd = this.pwd
+                this.selected = 0
+                this.$nextTick(() => {
+                    this.fileFocus()
                 })
+            })
         },
         // 目录进入
         dirEnter() {
@@ -204,44 +206,8 @@ export default {
             })()
             this.la()
         },
-        // 连接 SSH
-        sshLogin() {
-            this.loading = true
-            const { sshList, sshTags, sshActive } = this.$store.state.sshInfo
-            const sshInfo = sshList.get(sshTags[sshActive].sshKey)
-            const { host, port, username, password } = sshInfo
-            this.tools.ssh({
-                params: { host, port, username, password },
-                success: ssh => {
-                    this.ssh     = ssh
-                    this.lastPwd = ''
-                    this.la()
-                },
-            })
-        },
         // 下载
         download(item) {
-            if (item.type === 'd') {
-                    fs.mkdirSync(path.join('/', item.name), { recursive: true })
-                this.ssh.getDirectory(path.join('/', item.name), `${this.lastPwd}/${item.name}`)
-                    .then(Contents => {
-                        this.notify.success(`目录 ${item.name} 下载成功`)
-                        console.log(Contents);
-                    }, err => {
-                        this.notify.error(`目录 ${item.name} 下载失败`)
-                        console.log(err)
-                    });
-            }
-            if (item.type === '-') {
-                this.ssh.getFile(path.join('/', item.name), `${this.lastPwd}/${item.name}`)
-                    .then(Contents => {
-                        this.notify.success(`文件 ${item.name} 下载成功`)
-                        console.log(Contents);
-                    }, err => {
-                        this.notify.error(`文件 ${item.name} 下载失败`)
-                        console.log(err)
-                    })
-            }
         },
         // 选择文件
         selectFile(index) {
@@ -261,7 +227,7 @@ export default {
         },
     },
     created() {
-        this.sshLogin()
+        this.la()
     }
 }
 </script>
@@ -296,6 +262,7 @@ export default {
     position: sticky
     top: 0
     z-index: 99
+    background: #FFFFFF
     box-sizing: border-box
     .pwd-input,
     .btn-enter
@@ -317,6 +284,7 @@ export default {
     position: sticky
     top: 25px
     z-index: 99
+    background: #FFFFFF
     border-top: 1px solid rgba($dark, .1)
     border-bottom: 1px solid rgba($dark, .1)
     .select-all

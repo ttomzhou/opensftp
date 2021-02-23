@@ -21,7 +21,7 @@ import sessionTag from 'src/components/sessionTag'
 import headerMenu from 'src/components/headerMenu'
 
 export default {
-    name: 'HeaderBar',
+    name: 'HeaderBarWin',
     components: {
         'session-tag': sessionTag,
         'header-menu': headerMenu,

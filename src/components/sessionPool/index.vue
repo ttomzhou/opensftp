@@ -18,7 +18,10 @@
                 <q-item-section avatar>
                     <q-avatar rounded size="md">
                         <q-spinner-gears v-if="loading === index" class="session-icon" />
-                        <q-btn v-else class="session-icon" icon="dns" size="sm" flat/>
+                        <q-btn v-else flat
+                               class="session-icon" 
+                               :class="{ 'text-positive': $q.dark.isActive }" 
+                               icon="dns" size="sm"/>
                     </q-avatar>
                 </q-item-section>
                 <q-item-section>
@@ -97,16 +100,6 @@ export default {
             const { id, host, port, username, password } = item
             this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
             this.$router.push({ path: '/sftp' })
-            // const { id, host, port, username, password } = item
-            // this.loading = index
-            // this.tools.ssh({
-            //     params: { host, port, username, password },
-            //     success: ssh => {
-            //         this.$store.commit('sshInfo/SSH_TAGS_ADD', id)
-            //         this.$router.push({ path: '/sftp' })
-            //     },
-            //     finish: () => this.loading = null,
-            // })
         },
         // 重命名开始
         renameOpen(item, index) {

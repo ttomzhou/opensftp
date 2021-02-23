@@ -11,12 +11,33 @@ input
     &[type="number"]
         -moz-appearance: textfield
 
+body
+    background: all .3s
+    &.body--light
+        background: rgba(#FFFFFF, .8)
+        .bg-aero
+            background: rgba(#FFFFFF, .5)
+            backdrop-filter: blur(10px) saturate(180%)
+        .fs-control, .fs-head
+            background: rgba(#FFFFFF, .5)
+            .pwd-input,button
+                color: $dark
+    &.body--dark
+        background: none
+        .bg-aero
+            background: rgba($dark, .5)
+            backdrop-filter: blur(10px) saturate(180%)
+        .fs-control, .fs-head
+            background: rgba($dark, .5)
+            .pwd-input,button
+                color: #FFFFFF
+
 .disable-copy
     @include disable-copy
 
 .q-dialog__backdrop
     backdrop-filter: blur(10px)
 
-.bg-aero-light
+.bg-aero
     background: rgba(#FFFFFF, .5)
     backdrop-filter: blur(10px) saturate(180%)

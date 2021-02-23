@@ -4,8 +4,8 @@
               :no-esc-dismiss="false"
               transition-show="slide-up"
               transition-hide="slide-down">
-        <q-card class="attr-panel disable-copy">
-            <q-bar class="bg-primary text-white">
+        <q-card class="attr-panel disable-copy bg-aero">
+            <q-bar :class="{ 'bg-primary text-white': !$q.dark.isActive }">
                 <div>{{ panelName }}</div>
                 <q-space />
                 <q-btn dense flat icon="close" v-close-popup/>

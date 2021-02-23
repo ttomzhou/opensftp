@@ -1,7 +1,7 @@
 <template>
     <q-menu touch-position
             context-menu
-            content-class="bg-aero-light"
+            content-class="bg-aero"
             ref="menu"
             @before-show="$emit('click')"
             @before-hide="$emit('close')"

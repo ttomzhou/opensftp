@@ -1,7 +1,8 @@
 <template>
     <q-layout view="lHh Lpr lFf">
-        <q-header elevated>
-            <header-bar/>
+        <q-header elevated :class="{ 'bg-dark': $q.dark.isActive }">
+            <header-bar-mac v-if="$q.platform.is.mac"/>
+            <header-bar-win v-if="$q.platform.is.win"/>
         </q-header>
 
         <q-page-container>
@@ -11,12 +12,14 @@
 </template>
 
 <script>
-import headerBar from 'src/components/headerBar'
+import headerBarMac from 'src/components/headerBar/mac'
+import headerBarWin from 'src/components/headerBar/win'
 
 export default {
     name: "MainLayout",
     components: {
-        'header-bar': headerBar
+        'header-bar-mac': headerBarMac,
+        'header-bar-win': headerBarWin,
     },
     data() {
         return {

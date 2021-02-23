@@ -1,5 +1,5 @@
 <template>
-    <q-menu content-class="bg-aero-light" ref="menu">
+    <q-menu content-class="bg-aero" ref="menu">
         <q-list dense style="min-width: 150px">
             <q-item clickable v-close-popup @click="emitHandle('rename')">
                 <q-item-section>帮助</q-item-section>
