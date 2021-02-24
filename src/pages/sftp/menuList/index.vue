@@ -1,7 +1,6 @@
 <template>
     <q-menu touch-position
             context-menu
-            content-class="bg-aero"
             @before-show="$emit('click')"
             @before-hide="$emit('close')">
         <q-list dense style="min-width: 100px">

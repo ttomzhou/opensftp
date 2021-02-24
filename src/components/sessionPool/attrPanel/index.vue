@@ -4,7 +4,7 @@
               :no-esc-dismiss="false"
               transition-show="slide-up"
               transition-hide="slide-down">
-        <q-card class="attr-panel disable-copy bg-aero">
+        <q-card class="attr-panel disable-copy">
             <q-bar :class="{ 'bg-primary text-white': !$q.dark.isActive }">
                 <div>{{ panelName }}</div>
                 <q-space />
@@ -21,9 +21,10 @@
                     <q-input label="密码" v-model="session.password"
                             :type="showPwd ? 'text' : 'password'">
                         <template v-slot:append>
-                            <q-btn v-show="session.password" 
+                            <q-btn v-show="session.password"
                                    :icon="showPwd ? 'visibility' : 'visibility_off'" 
                                    flat round
+                                   size="sm"
                                    @click="showPwd = !showPwd"/>
                         </template>
                     </q-input>

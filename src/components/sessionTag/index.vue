@@ -1,6 +1,9 @@
 <template>
     <div class="row full-height">
-        <q-btn icon="home" flat v-show="tagList.length" @click="backHome"/>
+        <q-btn v-show="tagList.length"
+               icon="home" flat 
+               class="no-border-radius"
+               @click="backHome"/>
         <q-btn v-for="(item, index) in tagList"
                :key="index"
                :color="$store.state.sshInfo.sshActive === index ? 'teal-7' : 'blue-10'"

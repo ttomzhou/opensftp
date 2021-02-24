@@ -1,0 +1,87 @@
+@import "./quasar.variables"
+
+.body--light
+    .fs-control, .fs-head
+        background: rgba(#FFFFFF, .5)
+        .pwd-input,button
+            color: $dark
+
+.body--dark
+    .fs-control, .fs-head
+        background: rgba($dark, .5)
+        .pwd-input,button
+            color: #FFFFFF
+
+.fs-system
+    display: flex
+    flex-direction: column
+    height: 100%
+
+.fs-control
+    position: sticky
+    top: 0
+    z-index: 99
+    box-sizing: border-box
+    .pwd-input,
+    .btn-enter
+        height: 25px
+        padding: 0
+        border: 0
+        outline: none
+        background: none
+    .pwd-input
+        width: calc( 100% - 60px )
+        padding: 0 5px
+    .btn-enter
+        width: 30px
+        text-align: center
+        cursor: pointer
+        &:hover
+            background: rgba($dark, .1)
+
+.fs-item,
+.fs-head
+    display: flex
+    height: 25px
+    line-height: 25px
+
+.item
+    margin-right: 5px
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+    &:first-child
+        padding-left: 5px
+    &:last-child
+        padding-right: 5px
+    &.select-all
+        min-width: 30px
+        margin-right: 5px
+    &.icon
+        min-width: 30px
+        margin-right: 5px
+    &.name
+        width: 200px
+    &.size
+        width: 100px
+    &.date
+        width: 150px
+    &.owner
+        width: 100px
+    &.group
+        width: 100px
+
+.fs-head
+    position: sticky
+    top: 25px
+    z-index: 99
+    border-top: 1px solid rgba($dark, .1)
+    border-bottom: 1px solid rgba($dark, .1)
+
+.fs-item
+    outline: none
+    &:hover
+        background: rgba($primary, .1)
+    &:focus,&.focus-temp
+        background: $primary
+        color: #FFFFFF

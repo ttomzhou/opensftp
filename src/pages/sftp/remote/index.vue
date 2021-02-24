@@ -1,5 +1,5 @@
 <template>
-    <div class="remote">
+    <div class="fs-system">
         <q-inner-loading :showing="loading" style="z-index: 100">
             <q-spinner-gears size="50px" color="primary" />
         </q-inner-loading>
@@ -45,7 +45,7 @@
                     </div>
                     <div class="item name">{{ item.name }}</div>
                     <div v-show="item.name !== '..'" class="item size">{{ fileSize(item) }}</div>
-                    <div v-show="item.name !== '..'" class="item date">{{ item.date }}</div>
+                    <div v-show="item.name !== '..'" class="item date">{{ fileCreatedTime(item.date) }}</div>
                     <div v-show="item.name !== '..'" class="item owner">{{ item.owner }}</div>
                     <div v-show="item.name !== '..'" class="item group">{{ item.group }}</div>
                     <!-- 右键菜单 -->
@@ -164,6 +164,9 @@ export default {
                 if (type === '-') return require('src/assets/sftp-icons/document.svg')
             }
         },
+        fileCreatedTime() {
+            return time => this.tools.formatDate(new Date(time).getTime(), 'MM-dd HH:mm')
+        },
     },
     methods: {
         // 列出当前路径文件列表
@@ -257,6 +260,10 @@ export default {
         moveFocus(action) {
             if (action === 'up' && this.selected !== 0) this.selected -= 1
             if (action === 'down' && this.selected !== this.list.length - 1) this.selected += 1
+            // 若不显示隐藏文件，判断当前 selected 元素是否为隐藏文件
+            // 若为隐藏文件，则递归移动聚焦元素
+            if (!this.showHideItem && this.hideItem(this.list[this.selected])) return this.moveFocus(action)
+            // 文件聚焦
             this.fileFocus()
         },
     },
@@ -265,72 +272,3 @@ export default {
     }
 }
 </script>
-
-<style lang="sass" scope>
-.remote
-    display: flex
-    flex-direction: column
-    height: 100%
-.fs-item,
-.fs-head
-    display: flex
-    height: 25px
-    line-height: 25px
-    .item
-        margin-right: 5px
-        white-space: nowrap
-        overflow: hidden
-        text-overflow: ellipsis
-    .name
-        width: 200px
-    .size
-        width: 100px
-    .date
-        width: 150px
-    .owner
-        width: 100px
-    .group
-        width: 100px
-
-.fs-control
-    position: sticky
-    top: 0
-    z-index: 99
-    box-sizing: border-box
-    .pwd-input,
-    .btn-enter
-        height: 25px
-        padding: 0
-        border: 0
-        outline: none
-        background: none
-    .pwd-input
-        width: calc( 100% - 60px )
-        padding: 0 5px
-    .btn-enter
-        width: 30px
-        text-align: center
-        cursor: pointer
-        &:hover
-            background: rgba($dark, .1)
-.fs-head
-    position: sticky
-    top: 25px
-    z-index: 99
-    border-top: 1px solid rgba($dark, .1)
-    border-bottom: 1px solid rgba($dark, .1)
-    .select-all
-        width: 25px
-        margin-right: 5px
-
-.fs-item
-    outline: none
-    .icon
-        min-width: 25px
-        margin-right: 5px
-    &:hover
-        background: rgba($primary, .1)
-    &:focus,&.focus-temp
-        background: $primary
-        color: #FFFFFF
-</style>
