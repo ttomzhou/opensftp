@@ -32,28 +32,49 @@
                      :key="index" 
                      :class="{ 
                          hidden: hideItem(item),
-                         'focus-temp': openMenu === index
+                         'focus-temp': openMenu === index || renameItem.index === index,
                      }"
                      @click="selectFile(index)"
                      @dblclick="dirEnter"
                      @keydown.enter="dirEnter"
                      @keydown.backspace="dirBack"
+                     @keydown.f2="renameOpen(item, index)"
                      @keydown.prevent.up="moveFocus('up')"
                      @keydown.prevent.down="moveFocus('down')">
                     <div class="item icon">
                         <img :src="getFileIcon(item)" alt="">
                     </div>
-                    <div class="item name">{{ item.name }}</div>
-                    <div v-show="item.name !== '..'" class="item size">{{ fileSize(item) }}</div>
-                    <div v-show="item.name !== '..'" class="item date">{{ fileCreatedTime(item.date) }}</div>
-                    <div v-show="item.name !== '..'" class="item owner">{{ item.owner }}</div>
-                    <div v-show="item.name !== '..'" class="item group">{{ item.group }}</div>
+                    <div class="item name">
+                        <div v-show="renameItem.index !== index">{{ item.name }}</div>
+                        <input v-model="renameItem.name"
+                               v-show="renameItem.index === index && item.name !== '..'"
+                               type="text"
+                               tabindex="0"
+                               ref="rename-input"
+                               class="rename-input no-outline no-border no-padding"
+                               :placeholder="item.oldname"
+                               @blur="renameClose(index)"
+                               @click.stop=""
+                               @dblclick.stop=""
+                               @keydown.esc="renameCancel(index)"
+                               @keydown.stop.delete=""
+                               @keydown.stop.up=""
+                               @keydown.stop.down=""
+                               @keydown.stop.alt.r=""
+                               @keydown.stop.enter="$refs['rename-input'][index].blur()">
+                    </div>
+                    <div v-if="item.name !== '..'" class="item size">{{ fileSize(item) }}</div>
+                    <div v-if="item.name !== '..'" class="item date">{{ fileCreatedTime(item.date) }}</div>
+                    <div v-if="item.name !== '..'" class="item owner">{{ item.owner }}</div>
+                    <div v-if="item.name !== '..'" class="item group">{{ item.group }}</div>
                     <!-- 右键菜单 -->
                     <menu-list v-if="item.name !== '..'"
-                               :listItem="item" 
+                               action="remote"
+                               :listItem="item"
                                @click="openMenu = index"
                                @close="selectFile(index)"
-                               @download="download(item)"/>
+                               @download="download(item)"
+                               @rename="renameOpen(item, index)"/>
                 </div>
             </q-scroll-area>
         </div>
@@ -67,6 +88,7 @@
 import fs from 'fs'
 import path from 'path'
 import menuList from '../menuList'
+import { type } from 'os'
 
 export default {
     name: 'SFTPRemote',
@@ -77,7 +99,7 @@ export default {
         return {
             ssh: '',
             // 是否显示隐藏项目
-            showHideItem: false,
+            showHideItem: true,
             // 全选
             selectAll: false,
             // pwd
@@ -88,6 +110,7 @@ export default {
             loading: false,
             selected: 0,
             openMenu: null,
+            renameItem: {},
         }
     },
     computed: {
@@ -170,7 +193,7 @@ export default {
     },
     methods: {
         // 列出当前路径文件列表
-        la() {
+        la(focusFile) {
             this.loading = true
             this.ssh.execCommand('ls -la --time-style="+%Y-%m-%d %H:%I:%S"', { cwd: this.pwd })
                 .then(res => {
@@ -183,6 +206,15 @@ export default {
                     this.list = this.listFormat(res.stdout)
                     this.lastPwd = this.pwd
                     this.selected = 0
+                    // 若指定聚焦文件
+                    if (typeof focusFile === 'string') {
+                        for (let index = 0; index < this.list.length; index += 1) {
+                            if (this.list[index].name === focusFile) {
+                                this.selected = index
+                                break
+                            }
+                        }
+                    }
                     this.$nextTick(() => {
                         this.fileFocus()
                     })
@@ -265,6 +297,50 @@ export default {
             if (!this.showHideItem && this.hideItem(this.list[this.selected])) return this.moveFocus(action)
             // 文件聚焦
             this.fileFocus()
+        },
+        // 重命名开始
+        renameOpen(item, index) {
+            this.renameItem = this.tools.clone(item)
+            this.renameItem.oldname = this.renameItem.name
+            this.renameItem.index = index
+            // FIXME: nextTick 无效
+            setTimeout(() => this.$refs['rename-input'][index].focus(), 100)
+        },
+        // 重命名结束
+        renameClose(index) {
+            // 新名称与旧名称相同
+            if (this.renameItem.name === this.renameItem.oldname) {
+                this.renameItem = {}
+                this.fileFocus()
+                return
+            }
+            // 新名称存在
+             if (this.list.filter(item => item.name === this.renameItem.name).length === 1) {
+                // FIXME: 由 keydown enter 触发的事件，会影响 confirm 组件
+                return setTimeout(() => {
+                    this.tools.confirm({
+                        message: `已存在文件 ${this.renameItem.name}`,
+                        confirm: () => {
+                            setTimeout(() => this.$refs['rename-input'][index].focus(), 100)
+                        }
+                    })
+                }, 100);
+            }
+            // 重命名
+            this.loading = true
+            this.ssh.execCommand(`mv ${this.renameItem.oldname} ${this.renameItem.name}`, { cwd: this.pwd })
+                .then(res => {
+                    this.loading = false
+                    if (res.stderr) return this.tools.confirm(res.stderr)
+                    this.la(this.renameItem.name)
+                    this.fileFocus()
+                    this.renameItem = {}
+                })
+        },
+        // 重命名取消
+        renameCancel(index) {
+            this.renameItem.name = this.renameItem.oldname
+            this.$refs['rename-input'][index].blur()
         },
     },
     created() {

@@ -1,16 +1,18 @@
 <template>
     <q-menu touch-position
             context-menu
+            ref="menu"
             @before-show="$emit('click')"
-            @before-hide="$emit('close')">
-        <q-list dense style="min-width: 100px">
+            @before-hide="$emit('close')"
+            @keydown.f2="emitHandle('rename')">
+        <q-list dense style="min-width: 150px">
             <q-item clickable v-close-popup v-show="listItem.type === '-'">
                 <q-item-section>以 Webstorm 编辑</q-item-section>
             </q-item>
             <q-item v-show="listItem.type === '-' || listItem.type === 'd'" 
                     clickable v-close-popup 
-                    @click="$emit('download')">
-                <q-item-section>下载</q-item-section>
+                    @click="emitHandle('download')">
+                <q-item-section>{{ action === 'local' ? '上传' : '下载' }}</q-item-section>
             </q-item>
             <q-item clickable v-show="listItem.type === '-'">
                 <q-item-section>选择打开方式</q-item-section>
@@ -35,8 +37,11 @@
             <q-item clickable v-close-popup>
                 <q-item-section>删除</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup>
+            <q-item clickable v-close-popup @click="emitHandle('rename')">
                 <q-item-section>重命名</q-item-section>
+                <q-item-section side>
+                    <q-item-label caption>F2</q-item-label>
+                </q-item-section>
             </q-item>
             <q-item clickable v-close-popup>
                 <q-item-section>修改权限</q-item-section>
@@ -53,6 +58,9 @@
     export default {
         name: 'SFTPMenuList',
         props: {
+            action: {
+                type: String,
+            },
             listItem: {
                 type: Object,
                 default: {},
@@ -70,13 +78,11 @@
                 ],
             }
         },
-        watch: {
-        },
-        computed: {
-        },
         methods: {
+            emitHandle(action) {
+                this.$emit(action)
+                this.$refs.menu.hide()
+            },
         },
-        created() {
-        }
     }
 </script>

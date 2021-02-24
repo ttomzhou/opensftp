@@ -33,7 +33,9 @@
                            class="rename-input no-outline no-border no-padding"
                            :placeholder="item.host"
                            @blur="renameClose"
-                           @keydown.esc="$refs['rename-input'][index].blur()"
+                           @click.stop=""
+                           @dblclick.stop=""
+                           @keydown.esc="renameCancel(index)"
                            @keydown.stop.delete=""
                            @keydown.stop.up=""
                            @keydown.stop.down=""
@@ -104,6 +106,7 @@ export default {
         // 重命名开始
         renameOpen(item, index) {
             this.renameItem = this.tools.clone(item)
+            this.renameItem.oldname = this.renameItem.name
             // FIXME: nextTick 无效
             setTimeout(() => this.$refs['rename-input'][index].focus(), 100)
         },
@@ -118,6 +121,11 @@ export default {
             this.renameItem = {}
             this.getList()
             this.sessionFocus()
+        },
+        // 重命名取消
+        renameCancel(index) {
+            this.renameItem.name = this.renameItem.oldname
+            this.$refs['rename-input'][index].blur()
         },
         // 删除项目
         removeItem(item, index) {
